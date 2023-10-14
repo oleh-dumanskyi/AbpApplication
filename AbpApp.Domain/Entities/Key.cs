@@ -1,7 +1,8 @@
-﻿namespace AbpApp.Domain.Entities;
-
-public enum Key
+﻿namespace AbpApp.Domain.Entities
 {
-    button_color,
-    price
+    public enum Key
+    {
+        button_color,
+        price
+    }
 }

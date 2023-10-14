@@ -1,3 +1,6 @@
+using AbpApp.Application.Interfaces;
+using AbpApp.Application.Services;
+using AbpApp.Persistence;
 
 namespace AbpApp.WebAPI
 {
@@ -7,12 +10,29 @@ namespace AbpApp.WebAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var configuration = builder.Configuration;
             // Add services to the container.
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddPersistence(configuration);
+            using (var scope = builder.Services.BuildServiceProvider().CreateScope())
+            {
+                var serviceProvider = scope.ServiceProvider;
+                try
+                {
+                    var context = serviceProvider.GetRequiredService<AppDbContext>();
+                    DbInitializer.Initialize(context);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+
+            builder.Services.AddTransient<IExperimentService, ExperimentService>();
 
             var app = builder.Build();
 

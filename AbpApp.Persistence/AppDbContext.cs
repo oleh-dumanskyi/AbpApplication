@@ -2,7 +2,6 @@
 using AbpApp.Domain.Entities;
 using AbpApp.Persistence.EntityTypeConfiguration;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace AbpApp.Persistence
 {
