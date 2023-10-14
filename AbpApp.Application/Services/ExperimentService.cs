@@ -43,7 +43,7 @@ namespace AbpApp.Application.Services
         {
             var options = await _context.Options.Where(k => k.Key == key).ToListAsync(cancellationToken);
             if (options == null)
-                throw new NullReferenceException("Options not found");
+                throw new ArgumentNullException(nameof(options), "Options not found");
             var optionWeights = options.Select(k => k.Weight).ToList();
 
             decimal weightSum = 0;
@@ -57,7 +57,7 @@ namespace AbpApp.Application.Services
 
             var weightDifference = Math.Abs(100 - weightSum);
             if (weightDifference > allowedErrorMargin)
-                throw new ArgumentException("Incorrect weights");
+                throw new ArgumentException("Incorrect weights", paramName: nameof(weightDifference));
 
             var randomValue = _random.Next(0, 100);
 
@@ -81,7 +81,7 @@ namespace AbpApp.Application.Services
                 Option = await GetOptionGroup(key, cancellationToken)
             };
             if (experiment == null || experiment.Option == null)
-                throw new NullReferenceException("Experiment creation error");
+                throw new ArgumentNullException(nameof(experiment), "Experiment creation error");
 
             await _context.Experiments.AddAsync(experiment, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
@@ -92,7 +92,11 @@ namespace AbpApp.Application.Services
         public async Task<StatisticDTO> GetStatistics(Key key, CancellationToken cancellationToken)
         {
             var experiments = await _context.Experiments.Include(o => o.Option).ToListAsync(cancellationToken);
+            if (experiments == null)
+                throw new ArgumentNullException(nameof(experiments), "Experiments not found");
             var groupedOptions = experiments.Select(o => o.Option).GroupBy(o=>o.Value).ToList();
+            if (groupedOptions == null)
+                throw new ArgumentNullException(nameof(groupedOptions), "Options grouping error");
             var optionsStatistics = new Dictionary<string, int>();
             foreach (var option in groupedOptions)
             {

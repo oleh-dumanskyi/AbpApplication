@@ -22,11 +22,15 @@ namespace AbpApp.WebAPI.Controllers
         {
             try
             {
-                
+
                 var result = await _experimentService.GetExperiment(deviceToken, Key.button_color, cancellationToken);
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch (ArgumentNullException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -40,7 +44,11 @@ namespace AbpApp.WebAPI.Controllers
                 var result = await _experimentService.GetExperiment(deviceToken, Key.price, cancellationToken);
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch (ArgumentNullException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -53,9 +61,9 @@ namespace AbpApp.WebAPI.Controllers
             {
                 return Ok(await _experimentService.GetStatistics(Key.price, cancellationToken));
             }
-            catch (Exception ex)
+            catch (ArgumentNullException ex)
             {
-                return BadRequest(ex.Message);
+                return NotFound(ex.Message);
             }
         }
         [HttpGet("[controller]/[action]")]
@@ -65,9 +73,9 @@ namespace AbpApp.WebAPI.Controllers
             {
                 return Ok(await _experimentService.GetStatistics(Key.button_color, cancellationToken));
             }
-            catch (Exception ex)
+            catch (ArgumentNullException ex)
             {
-                return BadRequest(ex.Message);
+                return NotFound(ex.Message);
             }
         }
     }
