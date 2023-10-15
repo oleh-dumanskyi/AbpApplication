@@ -15,6 +15,7 @@ namespace AbpApp.Application.Services
             _context = context;
         }
 
+        // Returns DTO object with experiment data
         public async Task<ExperimentResponseDTO> GetExperiment(string deviceToken, Key key,
             CancellationToken cancellationToken)
         {
@@ -30,7 +31,9 @@ namespace AbpApp.Application.Services
                     Value = experiment.Option.Value
                 };
             }
-
+            // If the experiment is not found in the database, a method for creating a new experiment is called.
+            // It would be more appropriate to call this method in a separate POST request controller,
+            // but as far as I understand this contradicts the test assignment requirements.
             var newExperiment = await CreateExperiment(deviceToken, key, cancellationToken);
             return new ExperimentResponseDTO
             {
@@ -38,25 +41,25 @@ namespace AbpApp.Application.Services
                 Value = newExperiment.Option.Value
             };
         }
-
+        // Randomly select option values depending on its weights
         private async Task<Option> GetOptionGroup(Key key, CancellationToken cancellationToken)
         {
             var options = await _context.Options.Where(k => k.Key == key).ToListAsync(cancellationToken);
             if (options == null)
                 throw new ArgumentNullException(nameof(options), "Options not found");
             var optionWeights = options.Select(k => k.Weight).ToList();
-
+            
             decimal weightSum = 0;
             decimal cumulativeWeight = 0;
-            decimal allowedErrorMargin = 0.1M;
+            decimal allowableErrorMargin = 0.1M;
 
             foreach (var option in optionWeights)
             {
                 weightSum += option;
             }
-
+            // Checking the correctness of weights
             var weightDifference = Math.Abs(100 - weightSum);
-            if (weightDifference > allowedErrorMargin)
+            if (weightDifference > allowableErrorMargin)
                 throw new ArgumentException("Incorrect weights", paramName: nameof(weightDifference));
 
             var randomValue = _random.Next(0, 100);
@@ -88,10 +91,13 @@ namespace AbpApp.Application.Services
 
             return experiment;
         }
-
+        // Returns DTO object with statistics data
         public async Task<StatisticDTO> GetStatistics(Key key, CancellationToken cancellationToken)
         {
-            var experiments = await _context.Experiments.Include(o => o.Option).ToListAsync(cancellationToken);
+            var experiments = await _context.Experiments
+                .Include(o => o.Option)
+                .Where(k=>k.Option.Key == key)
+                .ToListAsync(cancellationToken);
             if (experiments == null)
                 throw new ArgumentNullException(nameof(experiments), "Experiments not found");
             var groupedOptions = experiments.Select(o => o.Option).GroupBy(o=>o.Value).ToList();

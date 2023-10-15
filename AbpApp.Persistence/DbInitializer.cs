@@ -4,6 +4,7 @@ namespace AbpApp.Persistence
 {
     public static class DbInitializer
     {
+        // Check whether database exists and fill options table up if it's currently empty
         public static void Initialize(AppDbContext context)
         {
             context.Database.EnsureCreated();

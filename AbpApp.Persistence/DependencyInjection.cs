@@ -9,6 +9,7 @@ namespace AbpApp.Persistence
     {
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
+            // Connection string is currently holding in secrets storage
             var connectionString = configuration["ConnectionString"];
             services.AddDbContext<AppDbContext>(option =>
             {
