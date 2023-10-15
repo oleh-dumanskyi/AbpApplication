@@ -31,7 +31,7 @@ namespace AbpApp.Application.Services
                     Value = experiment.Option.Value
                 };
             }
-            // If the experiment is not found in the database, a method for creating a new experiment is called.
+            // If the experiment with such device token is not found in the database, a method for creating a new experiment is called.
             // It would be more appropriate to call this method in a separate POST request controller,
             // but as far as I understand this contradicts the test assignment requirements.
             var newExperiment = await CreateExperiment(deviceToken, key, cancellationToken);
@@ -94,6 +94,7 @@ namespace AbpApp.Application.Services
         // Returns DTO object with statistics data
         public async Task<StatisticDTO> GetStatistics(Key key, CancellationToken cancellationToken)
         {
+            // TODO: Server-side pagination in case of large experiment data amount
             var experiments = await _context.Experiments
                 .Include(o => o.Option)
                 .Where(k=>k.Option.Key == key)
